@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Saúde Avançado</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --danger: #d93025;
+            --info: #1967d2;
+            --bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { color: #3c4043; margin-bottom: 30px; }
+
+        /* Grid dos Cards */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 6px solid var(--primary);
+        }
+
+        .card.bpm { border-color: var(--danger); }
+        .card.temp { border-color: var(--info); }
+
+        .label { font-size: 0.9rem; color: #5f6368; text-transform: uppercase; font-weight: bold; }
+        .value { font-size: 3rem; font-weight: bold; margin: 10px 0; color: #202124; }
+        .unit { font-size: 1rem; color: #70757a; }
+
+        /* Gráfico */
+        .chart-container {
+            background: white;
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            box-sizing: border-box;
+        }
+
+        /* Tabela */
+        .table-container {
+            background: white;
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead { background: var(--primary); color: white; }
+        th, td { padding: 12px 15px; text-align: center; border-bottom: 1px solid #eee; }
+        tr:nth-child(even) { background: #fcfcfc; }
+
+        #status {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .online { color: #1e8e3e; }
+        .offline { color: #d93025; }
+    </style>
+</head>
+<body>
+
+    <h1>Monitoramento Leito-01</h1>
+
+    <div class="dashboard">
+        <div class="card bpm">
+            <div class="label">Frequência Cardíaca</div>
+            <div id="bpm-val" class="value">--</div>
+            <span class="unit">BPM</span>
+        </div>
+        <div class="card temp">
+            <div class="label">Temperatura Corporal</div>
+            <div id="temp-val" class="value">--</div>
+            <span class="unit">°C</span>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="healthChart" height="100"></canvas>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Horário</th>
+                    <th>Batimentos (BPM)</th>
+                    <th>Temperatura (°C)</th>
+                </tr>
+            </thead>
+            <tbody id="logTable">
+                </tbody>
+        </table>
+    </div>
+
+    <div id="status">Conectando...</div>
+
+    <script>
+        const URL_API = "http://54.164.14.105/dados";
+        const bpmData = [];
+        const labels = [];
+
+        // Configuração do Gráfico
+        const ctx = document.getElementById('healthChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Histórico BPM',
+                    data: bpmData,
+                    borderColor: '#d93025',
+                    backgroundColor: 'rgba(217, 48, 37, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+
+        async function updateDashboard() {
+            try {
+                const response = await fetch(URL_API);
+                const data = await response.json();
+
+                // 1. Atualiza Cards
+                document.getElementById('bpm-val').innerText = data.bpm;
+                document.getElementById('temp-val').innerText = data.temp;
+
+                // 2. Atualiza Gráfico
+                const now = new Date().toLocaleTimeString();
+                labels.push(now);
+                bpmData.push(data.bpm);
+                
+                if(labels.length > 15) { labels.shift(); bpmData.shift(); }
+                chart.update();
+
+                // 3. Atualiza Tabela
+                const table = document.getElementById('logTable');
+                const row = `<tr>
+                    <td>${now}</td>
+                    <td>${data.bpm}</td>
+                    <td>${data.temp}</td>
+                </tr>`;
+                table.insertAdjacentHTML('afterbegin', row);
+                if(table.rows.length > 8) table.deleteRow(8);
+
+                document.getElementById('status').innerText = "● SISTEMA ONLINE";
+                document.getElementById('status').className = "online";
+
+            } catch (error) {
+                document.getElementById('status').innerText = "○ ERRO DE CONEXÃO";
+                document.getElementById('status').className = "offline";
+            }
+        }
+
+        setInterval(updateDashboard, 2000);
+        updateDashboard();
+    </script>
+</body>
+</html>

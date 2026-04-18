@@ -1,0 +1,314 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e6f9a3b2.1c8d5",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "saude/dados",
+        "topic": "saude/dados",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "b9c8d7e6.5f4a3",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 340,
+        "wires": [
+            [
+                "c5b4a392.8e7d6"
+            ]
+        ]
+    },
+    {
+        "id": "a1b2c3d4.e5f6",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Pegar BPM",
+        "func": "// Salva apenas o número do BPM na memória global\nglobal.set(\"valorBPM\", msg.payload.bpm); \n\n// Mantém o payload original para o InfluxDB não quebrar\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 280,
+        "wires": [
+            [
+                "7a8b9c0d.1e2f"
+            ]
+        ]
+    },
+    {
+        "id": "f8e7d6c5.b4a3",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Pegar Temp",
+        "func": "// O nome correto de acordo com o seu debug é 'temperatura'\nglobal.set(\"valorTemp\", msg.payload.temperatura);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 400,
+        "wires": [
+            [
+                "4f5e6d7c.8b9a"
+            ]
+        ]
+    },
+    {
+        "id": "d3c2b1a0.9f8e",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "7a8b9c0d.1e2f",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "4f5e6d7c.8b9a",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "3119fda3017c4c2c",
+        "type": "influxdb out",
+        "z": "f6f2187d.f17ca8",
+        "influxdb": "80979fd347f4ddd7",
+        "name": "",
+        "measurement": "leitura_saude",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "clinica_org",
+        "bucket": "iot",
+        "x": 680,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c5b4a392.8e7d6",
+        "type": "json",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 390,
+        "y": 340,
+        "wires": [
+            [
+                "a1b2c3d4.e5f6",
+                "f8e7d6c5.b4a3",
+                "d3c2b1a0.9f8e",
+                "e0bb7258cf41020d",
+                "2a548a0dc299071f"
+            ]
+        ]
+    },
+    {
+        "id": "e0bb7258cf41020d",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "function 1",
+        "func": "msg.payload = {\n    bpm: msg.payload.bpm,\n    temperatura: msg.payload.temperatura\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 480,
+        "wires": [
+            [
+                "3119fda3017c4c2c"
+            ]
+        ]
+    },
+    {
+        "id": "5e316acd644a91c2",
+        "type": "http in",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "url": "/dados",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 1030,
+        "y": 680,
+        "wires": [
+            [
+                "21f021164a269bb6"
+            ]
+        ]
+    },
+    {
+        "id": "3b0c1e3c10444d71",
+        "type": "http response",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1250,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "21f021164a269bb6",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "function 2",
+        "func": "msg.headers = { \"Access-Control-Allow-Origin\": \"*\" };\n\nmsg.payload = {\n    leito: global.get(\"idLeito\") || \"Não identificado\", // Pega o ID do leito\n    bpm: global.get(\"valorBPM\") || 0,\n    temp: global.get(\"valorTemp\") || 0\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1140,
+        "y": 620,
+        "wires": [
+            [
+                "3b0c1e3c10444d71"
+            ]
+        ]
+    },
+    {
+        "id": "2a548a0dc299071f",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Pegar Leito",
+        "func": "",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 340,
+        "wires": [
+            [
+                "027fe7f555c76905"
+            ]
+        ]
+    },
+    {
+        "id": "027fe7f555c76905",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "b9c8d7e6.5f4a3",
+        "type": "mqtt-broker",
+        "name": "Broker Interno AWS",
+        "broker": "mqtt_broker",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "80979fd347f4ddd7",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://influx_db:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "b14b14dc9fea4b77",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-influxdb": "0.7.0"
+        }
+    }
+]
