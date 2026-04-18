@@ -51,7 +51,7 @@ Todos os serviços correm em paralelo numa instância **AWS EC2**, utilizando Do
 ## 👥 Organização do Grupo
 
 * **Karina de Moraes**: IoT, Simulador Python, MQTT, Node-RED e InfluxDB.
-* **Nicolly Lemos e Karina de Moraes **: Backend (API Node.js), Regras de Negócio e SQLite.
+* **Nicolly Lemos e Karina de Moraes**: Backend (API Node.js), Regras de Negócio e SQLite.
 * **Rafaela Mansano e Nicolly Lemos**: Frontend (Interface Web, Gráficos e Integração API).
 * **Rafaela Mansano**: Documentação.
 
